@@ -6,7 +6,7 @@ exports.register = async (req, res) => {
   const hash = await bcrypt.hash(req.body.password, 10);
   res.json(await User.create({ ...req.body, password: hash }));
 };
-
+ 
 exports.login = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) return res.status(400).json({ message: 'User not found' });

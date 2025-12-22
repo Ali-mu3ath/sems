@@ -5,3 +5,4 @@ r.post('/register', c.register);
 r.post('/login', c.login);
 
 module.exports = r;
+ 

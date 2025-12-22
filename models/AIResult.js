@@ -20,7 +20,7 @@ const aiResultSchema = new mongoose.Schema({
     {
       timestamp: Date,
       value: Number,
-      reason: String
+      reason: String 
     }
   ],
 

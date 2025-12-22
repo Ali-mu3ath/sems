@@ -21,7 +21,7 @@ app.use('/api/ai', aiRoutes);
 app.get('/', (req, res) => {
   res.send('SEMS Backend Running');
 });
-
+ 
 // Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

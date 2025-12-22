@@ -11,7 +11,7 @@ exports.predictBill = async (req, res) => {
       recommendations: ['Reduce usage 18:00–20:00']
     };
 
-    const saved = await AIResult.create({
+    const saved = await AIResult.create({ 
       user: req.user.id,
       meterId,
       forecast: result.forecast,

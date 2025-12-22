@@ -9,3 +9,4 @@ exports.latest = async (req, res) => {
     await EnergyReading.findOne({ LCLid: req.params.id }).sort({ tstp: -1 })
   );
 };
+ 

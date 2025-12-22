@@ -6,3 +6,4 @@ r.post('/reading', a, c.addReading);
 r.get('/:id/latest', a, c.latest);
 
 module.exports = r;
+ 
