@@ -11,3 +11,15 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+
+
+
+
+
+/* 
+
+git add .
+git commit -m "وصف التعديل"
+git push
+
+ */
