@@ -19,7 +19,7 @@ module.exports = connectDB;
 /* 
 
 git add .
-git commit -m "وصف التعديل"
+git commit -m "after github connction"
 git push
 
  */
