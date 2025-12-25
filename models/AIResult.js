@@ -12,24 +12,24 @@ const aiResultSchema = new mongoose.Schema({
     required: true
   },
 
-  forecast: [Number],
-
-  predicted_bill: Number,
-
-  anomalies: [
-    {
-      timestamp: Date,
-      value: Number,
-      reason: String 
-    }
-  ],
-
-  recommendations: [String],
-
-  type: {
-    type: String,
-    enum: ['prediction', 'anomaly'],
+  consumption: {
+    type: Number,
     required: true
+  },
+
+  anomaly_score: {
+    type: Number,
+    required: true
+  },
+
+  is_anomaly: {
+    type: Boolean,
+    required: true
+  },
+
+  model_type: {
+    type: String,
+    default: 'mock-anomaly-v1'
   },
 
   created_at: {

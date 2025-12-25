@@ -1,49 +1,51 @@
 const AIResult = require('../models/AIResult');
+const aiService = require('../services/ai.service');
 
-exports.predictBill = async (req, res) => {
+const detectAnomaly = async (req, res) => {
   try {
-    const { meterId } = req.body;
+    const { meterId, consumption } = req.body;
 
-    const result = {
-      forecast: [0.2, 0.3, 0.4],
-      predicted_bill: 6.1,
-      anomalies: [],
-      recommendations: ['Reduce usage 18:00–20:00']
-    };
+    if (!meterId || consumption === undefined) {
+      return res.status(400).json({ message: 'Missing data' });
+    }
 
-    const saved = await AIResult.create({ 
-      user: req.user.id,
-      meterId,
-      forecast: result.forecast,
-      predicted_bill: result.predicted_bill,
-      anomalies: result.anomalies,
-      recommendations: result.recommendations,
-      type: 'prediction'
-    });
-
-    res.json(saved);
-  } catch (err) {
-    res.status(500).json({ message: 'AI Prediction failed' });
-  }
-};
-
-exports.detectAnomaly = async (req, res) => {
-  try {
-    const { meterId } = req.body;
-
-    const result = {
-      anomalies: []
-    };
+    const result = aiService.detectAnomaly(consumption);
 
     const saved = await AIResult.create({
       user: req.user.id,
       meterId,
-      anomalies: result.anomalies,
-      type: 'anomaly'
+      consumption,
+      anomaly_score: result.anomaly_score,
+      is_anomaly: result.is_anomaly
     });
 
-    res.json(saved);
+    res.json({
+      message: 'Anomaly analysis completed',
+      data: saved
+    });
+
   } catch (err) {
-    res.status(500).json({ message: 'Anomaly detection failed' });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+const getAnomalyHistory = async (req, res) => {
+  try {
+    const results = await AIResult.find({ user: req.user.id })
+      .sort({ createdAt: -1 });
+
+    res.json({
+      count: results.length,
+      data: results
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+module.exports = {
+  detectAnomaly,
+  getAnomalyHistory
+};
+

@@ -1,10 +1,15 @@
-exports.callAI = async (payload) => {
-  // MOCK – فقط هذا الملف سيتغير لاحقاً
+// services/ai.service.js
+function detectAnomaly(consumption) {
+  // Mock logic (مؤقت)
+  const threshold = 5; // kWh
+  const anomaly_score = consumption / 10;
+
   return {
-    LCLid: payload.LCLid,
-    forecast: [0.2, 0.3, 0.4],
-    predicted_bill: 6.1,
-    anomalies: [],
-    recommendations: ['Reduce usage 18:00–20:00']
+    anomaly_score,
+    is_anomaly: consumption > threshold
   };
+}
+
+module.exports = {
+  detectAnomaly
 };
