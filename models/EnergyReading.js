@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
 
-module.exports = mongoose.model(
-  'EnergyReading',
-  new mongoose.Schema({
-    LCLid: String,
-    tstp: Date,
-    energy_kwh: Number
-  })
-);
-  
+const energyReadingSchema = new mongoose.Schema({
+  meterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Meter',
+    required: true
+  },
+  consumption: {
+    type: Number,
+    required: true
+  }
+}, { timestamps: true });
+
+module.exports = mongoose.model('EnergyReading', energyReadingSchema);
