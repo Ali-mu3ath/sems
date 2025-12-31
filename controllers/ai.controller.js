@@ -13,7 +13,7 @@ const detectAnomaly = async (req, res) => {
     //  كشف الشذوذ
     const anomalyResult = aiService.detectAnomaly(consumption);
 
-    //  توليد النصايح (هون كانت ناقصة)
+    //  توليد النصايح 
     const recommendations = aiService.getRecommendations(
       consumption,
       anomalyResult.is_anomaly
@@ -46,7 +46,7 @@ const getAnomalyHistory = async (req, res) => {
   res.json(results);
 };
 
-//  هذا لازم يكون موجود
+
 const predictBill = async (req, res) => {
   try {
     const { meterId } = req.body;
