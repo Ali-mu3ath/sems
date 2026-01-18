@@ -1,83 +1,157 @@
-const AIResult = require('../models/AIResult');
-const aiService = require('../services/ai.service');
-const EnergyReading = require('../models/EnergyReading');
+const axios = require('axios');
+const { 
+  callAICoreForecast,
+  callAICoreAnomalyForecast,
+  callAICoreAnomalyDetection,   
+  callAICoreForecastNewHomes,
+  callAICoreForecast6001
+} = require("../services/ai-ml.service");
 
-const detectAnomaly = async (req, res) => {
+// 5000
+const forecastFromAI = async (req, res) => {
   try {
-    const { meterId, consumption } = req.body;
+    const { lclid, values } = req.body;
 
-    if (!meterId || consumption === undefined) {
-      return res.status(400).json({ message: 'Missing data' });
+    if (!lclid && !values) {
+      return res.status(400).json({ message: "lclid or values required" });
     }
-
-    //  كشف الشذوذ
-    const anomalyResult = aiService.detectAnomaly(consumption);
-
-    //  توليد النصايح 
-    const recommendations = aiService.getRecommendations(
-      consumption,
-      anomalyResult.is_anomaly
-    );
-
-    //  تخزين النتيجة
-    const saved = await AIResult.create({
-      user: req.user.id,
-      meterId,
-      consumption,
-      anomaly_score: anomalyResult.anomaly_score,
-      is_anomaly: anomalyResult.is_anomaly
+    const response = await axios.post("http://127.0.0.1:5000/predict", {
+      lclid,
+      values
     });
 
-    //  الرد للفرونت
-    res.json({
-      message: 'Anomaly analysis completed',
-      anomaly: anomalyResult,
-      recommendations,   //  هون بتطلع النصايح
-      data: saved
+    return res.json({
+      message: "AI forecast success",
+      data: response.data
     });
 
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    console.error("AI ERROR (5000):", error.message);
+    return res.status(500).json({
+      message: "AI forecast failed",
+      error: error.message
+    });
   }
 };
 
-const getAnomalyHistory = async (req, res) => {
-  const results = await AIResult.find({ user: req.user.id });
-  res.json(results);
+
+//5001
+const forecastNewHomes = async (req, res) => {
+  try {
+    const { lclid } = req.body;
+
+    if (!lclid) {
+      return res.status(400).json({ message: "lclid is required" });
+    }
+
+    const aiResult = await callAICoreForecastNewHomes(lclid);
+
+    return res.json({
+      success: true,
+       aiResult
+    });
+
+  } catch (error) {
+    console.error("Forecast New Homes Error (5001):", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
 };
 
-
-const predictBill = async (req, res) => {
+// 6000
+const anomalyForecast = async (req, res) => {
   try {
-    const { meterId } = req.body;
+    const { lclid, window } = req.body;
 
-    if (!meterId) {
-      return res.status(400).json({ message: 'meterId required' });
+    if (!lclid || !window) {
+      return res.status(400).json({ message: "lclid and window are required" });
     }
 
-    const readings = await EnergyReading.find({ meterId });
-
-    if (readings.length === 0) {
-      return res.json({
-        totalConsumption: 0,
-        predictedBill: 0,
-        message: 'No readings yet'
-      });
+    if (!Array.isArray(window) || window.length !== 14) {
+      return res.status(400).json({ message: "Window must be an array of 14 rows" });
     }
 
-    const values = readings.map(r => r.consumption);
-    const result = aiService.predictBill(values);
+    if (!window.every(row => Array.isArray(row) && row.length === 4)) {
+      return res.status(400).json({ message: "Each row in window must have 4 numbers" });
+    }
 
-    res.json(result);
+    const aiResult = await callAICoreAnomalyForecast(lclid, window);
 
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.json({
+      success: true,
+       aiResult
+    });
+
+  } catch (error) {
+    console.error("Anomaly Forecast Error (6000):", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+//7000
+const detectAnomalyCore7000 = async (req, res) => {
+  try {
+    const { lclid, consumption_values } = req.body;
+
+    if (!lclid || !consumption_values) {
+      return res.status(400).json({ message: "lclid and consumption_values are required" });
+    }
+
+    if (!Array.isArray(consumption_values) || consumption_values.length !== 12) {
+      return res.status(400).json({ message: "consumption_values must be an array of 12 numbers" });
+    }
+
+    const aiResult = await callAICoreAnomalyDetection(lclid, consumption_values);
+
+    return res.json({
+      success: true,
+       aiResult
+    });
+
+  } catch (error) {
+    console.error("Anomaly Detection (7000) Error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// 6001
+const forecastFrom6001 = async (req, res) => {
+  try {
+    const { lclid } = req.body;
+
+    if (!lclid) {
+      return res.status(400).json({ message: "lclid is required" });
+    }
+
+    const aiResult = await callAICoreForecast6001(lclid);
+
+    return res.json({
+      success: true,
+       aiResult
+    });
+
+  } catch (error) {
+    console.error("Forecast (6001) Error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
 
 module.exports = {
-  detectAnomaly,
-  getAnomalyHistory,
-  predictBill   
+  forecastFromAI,
+  forecastNewHomes,
+  anomalyForecast,
+  detectAnomalyCore7000,
+   forecastFrom6001 
 };
