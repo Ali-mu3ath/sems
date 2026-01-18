@@ -12,14 +12,3 @@ const connectDB = async () => {
 
 module.exports = connectDB;
 
-
-
-
-
-/* 
-
-git add .
-git commit -m "اخر تعديل مع api شغال"
-git push
-
- */
