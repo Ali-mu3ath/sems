@@ -8,12 +8,13 @@ const connectDB = async () => {
     console.error('❌ MongoDB connection failed');
     process.exit(1);
   }
+  
 };
-
+ 
 module.exports = connectDB;
 
 /*
 git add .
-git commit -m "اخر تعديل مع api شغال"
+git commit -m "   الشغل النهائي   "
 git push
 */
